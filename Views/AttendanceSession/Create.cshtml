@@ -1,0 +1,111 @@
+﻿@model TutionCenter.Models.AttendanceSession
+
+@{
+    ViewData["Title"] = "Generate Attendance Code";
+}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <!-- // 页面标题 -->
+                    <h2 class="fw-bold mb-2">
+                        Generate Attendance Code
+                    </h2>
+
+                    <!-- // 页面说明 -->
+                    <p class="text-muted mb-4">
+                        Select a class to generate a 6-digit attendance code.
+                        The code will be valid for 5 minutes.
+                    </p>
+
+                    <!-- // 提交表单到 Create(Post) -->
+                    <form asp-action="Create" method="post">
+
+                        <!-- // 防止 CSRF 攻击 -->
+                        @Html.AntiForgeryToken()
+
+                        <!-- // 显示 Model 错误 -->
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <!-- // 选择 Tuition Class -->
+                        <div class="mb-3">
+
+                            <label asp-for="TuitionClassId"
+                                   class="form-label">
+                                Class
+                            </label>
+
+                            <!-- // 下拉菜单，由 Controller 提供 ViewBag.TuitionClassId -->
+                            <!-- // 下拉菜单，由 Controller 提供所有可选择的班级 -->
+                            <select asp-for="TuitionClassId"
+                                    asp-items="ViewBag.Classes"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Class --
+                                </option>
+
+                            </select>
+
+                            <!-- // 显示验证错误 -->
+                            <span asp-validation-for="TuitionClassId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <!-- // 提示资讯 -->
+                        <div class="alert alert-info">
+
+                            <strong>Note:</strong>
+
+                            The attendance code will automatically expire
+                            after 5 minutes.
+
+                        </div>
+
+                        <!-- // 按钮 -->
+                        <div class="d-flex gap-2">
+
+                            <!-- // 产生 Attendance Code -->
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Generate Code
+                            </button>
+
+                            <!-- // 返回 Index -->
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    // 启用前端 Validation
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,6 @@
+@model TutionCenter.Models.TuitionClass
+@{ 
+    ViewData["Title"] = "Add Class"; 
+}
+<h2 class="text-primary fw-bold mb-4">Add Class</h2>
+@await Html.PartialAsync("_Form", Model)

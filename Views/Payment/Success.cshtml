@@ -1,0 +1,55 @@
+@model TutionCenter.Models.Payment
+
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-5">
+
+                <h2 class="text-success">✓ Payment Successful</h2>
+
+                <p>Your simulated payment has been completed.</p>
+
+                <dl class="row text-start">
+
+                    <dt class="col-5">Transaction ID</dt>
+                    <dd class="col-7">@Model.TransactionId</dd>
+
+                    <dt class="col-5">Payment Date</dt>
+                    <dd class="col-7">
+                        @Model.PaymentDate.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+
+                    <dt class="col-5">Amount</dt>
+                    <dd class="col-7">
+                        RM @Model.Amount.ToString("0.00")
+                    </dd>
+
+                    <dt class="col-5">Method</dt>
+                    <dd class="col-7">@Model.PaymentMethod</dd>
+
+                </dl>
+
+                <div class="d-flex justify-content-center gap-2">
+
+                    <!-- Added: Download Receipt PDF -->
+                    <a asp-action="DownloadReceipt"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-success">
+                        Download Receipt PDF
+                    </a>
+
+                    <a asp-action="Bills"
+                       class="btn btn-primary">
+                        Back to Bills
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

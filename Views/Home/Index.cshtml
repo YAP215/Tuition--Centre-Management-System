@@ -1,0 +1,136 @@
+﻿<div class="text-center mb-5">
+
+    <h1 class="display-4 fw-bold text-primary">
+        🎓 Tuition Center Dashboard
+    </h1>
+
+    <p class="lead">
+        Welcome back,
+        <strong>@User.Identity?.Name</strong> 👋
+    </p>
+
+    <p class="text-muted">
+        Manage your tuition center efficiently.
+    </p>
+
+</div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+
+        <!-- Student -->
+        <div class="col">
+
+            <div class="card border-0 shadow">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Total Students</h6>
+
+                            <h2 class="fw-bold text-primary">
+                                @ViewBag.StudentCount
+                            </h2>
+                        </div>
+
+                        <div class="display-4">
+                            👨‍🎓
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col">
+            <div class="card border-0 shadow">
+                <div class="card-body"><div class="d-flex justify-content-between align-items-center"><div><h6 class="text-muted">Active Subjects</h6><h2 class="fw-bold text-info">@ViewBag.SubjectCount</h2></div><div class="display-4">📚</div></div></div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card border-0 shadow">
+                <div class="card-body"><div class="d-flex justify-content-between align-items-center"><div><h6 class="text-muted">Open Classes</h6><h2 class="fw-bold text-danger">@ViewBag.ClassCount</h2></div><div class="display-4">🗓️</div></div></div>
+            </div>
+        </div>
+
+        <!-- Teacher -->
+        <div class="col">
+
+            <div class="card border-0 shadow">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Total Teachers</h6>
+
+                            <h2 class="fw-bold text-success">
+                                @ViewBag.TeacherCount
+                            </h2>
+                        </div>
+
+                        <div class="display-4">
+                            👨‍🏫
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Admin -->
+        <div class="col">
+
+            <div class="card border-0 shadow">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Total Admins</h6>
+
+                            <h2 class="fw-bold text-warning">
+                                @ViewBag.AdminCount
+                            </h2>
+                        </div>
+
+                        <div class="display-4">
+                            👨‍💼
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-lg p-5 text-center">
+
+        <h3>
+            Welcome,
+            <strong>@User.Identity?.Name</strong> 👋
+        </h3>
+
+        <p class="text-muted mt-3">
+            You are logged in as
+            <strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</strong>.
+        </p>
+
+        <p>
+            Use the menu on the left to access the available functions.
+        </p>
+
+    </div>
+}

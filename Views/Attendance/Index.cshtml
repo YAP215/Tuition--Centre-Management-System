@@ -1,0 +1,377 @@
+﻿@model TutionCenter.Models.AttendanceDashboardViewModel
+
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Attendance Records";
+
+    // 把月份数字转换成月份名称
+    string selectedMonthName =
+        CultureInfo.CurrentCulture
+            .DateTimeFormat
+            .GetMonthName(Model.SelectedMonth);
+}
+
+<style>
+    /* View Details 按钮不换行 */
+    .attendance-details-btn {
+        white-space: nowrap;
+    }
+
+    /* 每个科目的 Attendance Percentage 区域 */
+    .subject-percentage {
+        min-width: 145px;
+        max-width: 170px;
+    }
+
+    /* 每个科目的小进度条 */
+    .subject-progress {
+        height: 7px;
+        border-radius: 20px;
+        background-color: #e9ecef;
+    }
+
+        /* Progress bar 圆角 */
+        .subject-progress .progress-bar {
+            border-radius: 20px;
+
+        }
+
+    /* Monthly PDF 浅蓝色按钮 */
+    .monthly-pdf-btn {
+        background-color: #cfe2ff;
+        border: 1px solid #b6d4fe;
+        color: #0d6efd;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+        .monthly-pdf-btn:hover {
+            background-color: #b6d4fe;
+            border-color: #9ec5fe;
+            color: #0a58ca;
+        }
+</style>
+
+<div class="container">
+
+    @* 页面标题 *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                Attendance Records
+            </h2>
+
+            <p class="text-muted mb-0">
+                View monthly attendance summaries by subject and class.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="DownloadMonthlyPdf"
+               asp-route-month="@Model.SelectedMonth"
+               asp-route-year="@Model.SelectedYear"
+               class="btn monthly-pdf-btn">
+
+                📄 Download Monthly PDF
+            </a>
+
+            @if (User.IsInRole("Teacher") ||
+                 User.IsInRole("Admin"))
+            {
+                <a asp-action="Create"
+                   class="btn btn-success">
+
+                    + Mark Attendance
+                </a>
+            }
+
+        </div>
+
+    </div>
+
+    @* 显示成功信息 *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @* 月份和年份筛选 *@
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-3 align-items-end">
+
+                @* Month *@
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Month
+                    </label>
+
+                    <select name="month"
+                            class="form-select">
+
+                        @for (int month = 1;
+                              month <= 12;
+                              month++)
+                        {
+                            string monthName =
+                                CultureInfo.CurrentCulture
+                                    .DateTimeFormat
+                                    .GetMonthName(month);
+
+                            if (month == Model.SelectedMonth)
+                            {
+                                <option value="@month" selected>
+                                    @monthName
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@month">
+                                    @monthName
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                @* Year *@
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Year
+                    </label>
+
+                    <select name="year"
+                            class="form-select">
+
+                        @for (int year =
+                            DateTime.Today.Year - 3;
+                            year <=
+                            DateTime.Today.Year + 2;
+                            year++)
+                        {
+                            if (year == Model.SelectedYear)
+                            {
+                                <option value="@year" selected>
+                                    @year
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@year">
+                                    @year
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                @* Filter Button *@
+                <div class="col-md-4">
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Filter Attendance
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    @* 同一个 Subject + Class 只显示一行 *@
+    <div class="card shadow-sm border-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th class="ps-4"
+                            style="background:#cfe2ff;">
+                            Subject / Class
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Total
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Present
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Late
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Absent
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Attendance %
+                        </th>
+
+                        <th class="text-end pe-4"
+                            style="background:#cfe2ff;">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (Model.ClassSummaries.Any())
+                    {
+                        @foreach (var item in Model.ClassSummaries)
+                        {
+                            // 根据 Attendance Percentage 决定进度条颜色
+                            string progressClass =
+                                item.AttendancePercentage >= 80
+                                    ? "bg-success"
+                                    : item.AttendancePercentage >= 60
+                                        ? "bg-warning"
+                                        : "bg-danger";
+
+                            <tr>
+
+                                @* Subject 和 Class 资料 *@
+                                <td class="ps-4">
+
+                                    <div class="fw-semibold">
+                                        @item.SubjectName
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @item.SubjectCode -
+                                        @item.ClassCode
+                                    </small>
+
+                                </td>
+
+                                @* Total *@
+                                <td>
+                                    @item.TotalRecords
+                                </td>
+
+                                @* Present *@
+                                <td class="text-success fw-semibold">
+                                    @item.PresentCount
+                                </td>
+
+                                @* Late *@
+                                <td class="text-warning fw-semibold">
+                                    @item.LateCount
+                                </td>
+
+                                @* Absent *@
+                                <td class="text-danger fw-semibold">
+                                    @item.AbsentCount
+                                </td>
+
+                                @* Attendance Percentage + 小进度条 *@
+                                <td>
+
+                                    <div class="subject-percentage">
+
+                                        <div class="d-flex justify-content-between mb-1">
+
+                                            <strong class="text-primary">
+                                                @item.AttendancePercentage.ToString("0.0")%
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="progress subject-progress">
+
+                                            <div class="progress-bar @progressClass"
+                                                 role="progressbar"
+                                                 style="width:@item.AttendancePercentage%;"
+                                                 aria-valuenow="@item.AttendancePercentage"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                @* View Details *@
+                                <td class="text-end pe-4">
+
+                                    <a asp-action="Details"
+                                       asp-route-tuitionClassId="@item.TuitionClassId"
+                                       asp-route-month="@Model.SelectedMonth"
+                                       asp-route-year="@Model.SelectedYear"
+                                       class="btn btn-sm btn-outline-primary attendance-details-btn">
+
+                                        View Details
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+
+                            <td colspan="7"
+                                class="text-center py-5">
+
+                                <h5 class="fw-bold">
+                                    No attendance records found
+                                </h5>
+
+                                <p class="text-muted mb-0">
+                                    No records were found for
+                                    @selectedMonthName
+                                    @Model.SelectedYear.
+                                </p>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

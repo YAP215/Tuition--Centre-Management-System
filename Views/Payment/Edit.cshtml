@@ -1,0 +1,74 @@
+﻿@model TutionCenter.Models.Payment
+
+@{
+    ViewData["Title"] = "Edit Payment";
+}
+
+<h1>Edit Payment</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="StudentId" class="form-label">Student</label>
+        <select asp-for="StudentId" class="form-select">
+            <option value="">-- Select Student --</option>
+            @foreach (var student in ViewBag.Students)
+            {
+                <option value="@student.Id">
+                    @student.Name
+                </option>
+            }
+        </select>
+
+        <span asp-validation-for="StudentId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">Amount (RM)</label>
+        <input asp-for="Amount" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PaymentDate" class="form-label">Payment Date</label>
+        <input asp-for="PaymentDate" class="form-control" type="date" />
+        <span asp-validation-for="PaymentDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PaymentMethod" class="form-label">Payment Method</label>
+
+        <select asp-for="PaymentMethod" class="form-select">
+            <option value="Cash">Cash</option>
+            <option value="Online Banking">Online Banking</option>
+            <option value="Card">Card</option>
+            <option value="E-Wallet">E-Wallet</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label">Status</label>
+
+        <select asp-for="Status" class="form-select">
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Remarks" class="form-label">Remarks</label>
+        <textarea asp-for="Remarks" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+
+</form>

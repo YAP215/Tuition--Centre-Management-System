@@ -1,0 +1,92 @@
+@model IEnumerable<TutionCenter.Models.Bill>
+
+@{
+    ViewData["Title"] = "Bills";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>🧾 Bills</h2>
+        <p class="text-muted mb-0">
+            Your tuition fees and payment status.
+        </p>
+    </div>
+
+    <a asp-action="StudentBilling"
+       class="btn btn-outline-primary">
+        Payment History
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You do not have any bills yet.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var bill in Model)
+                {
+                    <tr>
+                        <td>
+                            @bill.Description
+                        </td>
+
+                        <td>
+                            RM @bill.Amount.ToString("0.00")
+                        </td>
+
+                        <td>
+                            @bill.DueDate.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            <span class="badge @(bill.Status == "Paid"
+                                                                ? "bg-success"
+                                                                : bill.Status == "Cancelled"
+                                                                    ? "bg-secondary"
+                                                                    : "bg-warning text-dark")">
+                                @bill.Status
+                            </span>
+                        </td>
+
+                        <td>
+                            @if (bill.Status == "Unpaid")
+                            {
+                                <a asp-action="Checkout"
+                                   asp-route-id="@bill.Id"
+                                   class="btn btn-primary btn-sm">
+                                    Pay Now
+                                </a>
+                            }
+                            else if (bill.Status == "Paid")
+                            {
+                                <span class="text-success">
+                                    Paid
+                                </span>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

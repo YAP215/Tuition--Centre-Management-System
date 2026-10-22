@@ -1,0 +1,211 @@
+﻿@model IEnumerable<TutionCenter.Models.AttendanceSession>
+
+
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                🔢 Attendance Code Management
+            </h2>
+
+            <p class="text-muted mb-0">
+                Generate and manage attendance codes for classes.
+            </p>
+        </div>
+
+        <a asp-action="Create"
+           class="btn btn-success">
+            + Generate Code
+        </a>
+
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    
+
+        <div class="card-body p-0">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+
+                    <h5 class="fw-bold">
+                        No attendance codes found
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        Generate an attendance code for a class.
+                    </p>
+
+                    <a asp-action="Create"
+                       class="btn btn-primary">
+                        Generate Code
+                    </a>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="ps-3"
+                                    style="background:#cfe2ff;">
+                                    Class
+                                </th>
+
+                                <th style="background:#cfe2ff;">
+                                    Code
+                                </th>
+
+                                <th style="background:#cfe2ff;">
+                                    Created
+                                </th>
+
+                                <th style="background:#cfe2ff;">
+                                    Expires
+                                </th>
+
+                                <th style="background:#cfe2ff;">
+                                    Status
+                                </th>
+
+                                <th style="background:#cfe2ff;">
+                                    Check-ins
+                                </th>
+
+                                <th class="text-end pe-3"
+                                    style="background:#cfe2ff;">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                bool isExpired =
+                                    item.ExpiresAt <= DateTime.Now;
+
+                                bool isActive =
+                                    item.IsActive && !isExpired;
+
+                                <tr>
+
+                                    <td class="ps-3">
+
+                                        <div class="fw-semibold">
+                                            @item.TuitionClass?.Subject?.Name
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @item.TuitionClass?.ClassCode
+                                        </small>
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="fw-bold text-primary fs-5">
+                                            @item.AttendanceCode
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        @item.CreatedAt.ToString("dd MMM yyyy")
+
+                                        <br />
+
+                                        <small class="text-muted">
+                                            @item.CreatedAt.ToString("hh:mm tt")
+                                        </small>
+
+                                    </td>
+
+                                    <td>
+
+                                        @item.ExpiresAt.ToString("dd MMM yyyy")
+
+                                        <br />
+
+                                        <small class="text-muted">
+                                            @item.ExpiresAt.ToString("hh:mm tt")
+                                        </small>
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (isActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Closed / Expired
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge bg-primary rounded-pill">
+                                            @item.Attendances.Count
+                                        </span>
+
+                                    </td>
+
+                                    <td class="text-end pe-3">
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,52 @@
+﻿@model IEnumerable<TutionCenter.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payment History";
+}
+
+@*<div class="d-flex justify-content-between align-items-center mb-3">*@
+    <h1 >Payment History</h1>
+
+    @*<a asp-action="Create" class="btn btn-primary">
+        + Add Payment
+    </a>
+</div>*@
+
+<style>
+    .payment-table thead th{
+        background-color:#c9dcf5;
+        color:black;
+    }
+</style>
+
+<table class="table payment-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Amount</th>
+            <th>Payment Date</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var payment in Model)
+        {
+            <tr>
+                <td>@payment.Student?.Name</td>
+                <td>RM @payment.Amount</td>
+                <td>@payment.PaymentDate.ToShortDateString()</td>
+                <td>@payment.PaymentMethod</td>
+                <td>@payment.Status</td>
+                <td>@payment.Remarks</td>
+                <td>
+                    @*<a asp-action="Edit" asp-route-id="@payment.Id" class="btn btn btn-outline-primary"> Edit </a>*@
+                    <a asp-action="Delete" asp-route-id="@payment.Id" class="btn btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

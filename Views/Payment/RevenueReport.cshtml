@@ -1,0 +1,337 @@
+﻿@model IEnumerable<TutionCenter.Models.Payment>
+
+@{
+    ViewData["Title"] = "Revenue Report";
+}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold">📊 Revenue Report</h2>
+        <p class="text-muted">
+            View payment revenue and payment statistics.
+        </p>
+    </div>
+
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Revenue</h6>
+                    <h3 class="fw-bold">
+                        RM @ViewBag.TotalRevenue
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Payments</h6>
+                    <h3 class="fw-bold">
+                        @ViewBag.TotalPayments
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Paid Payments</h6>
+                    <h3 class="fw-bold">
+                        @ViewBag.PaidPayments
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Pending Payments</h6>
+                    <h3 class="fw-bold">
+                        @ViewBag.PendingPayments
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+
+        <!-- Pie Chart -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        Payment Status
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div style="height: 300px;">
+                        <canvas id="paymentStatusChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Bar Chart -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        Revenue by Payment Method
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div style="height: 300px;">
+                        <canvas id="revenueMethodChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Revenue Records -->
+    <div class="card border-0 shadow">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold">
+                Revenue Records
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    No payment records are available.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <style>
+                                        .revenue-table thead th {
+                                            background-color: #c9dcf5 !important;
+                                            color: black !important;
+                                        }
+                    </style>
+
+                    <table class="table table-hover align-middle revenue-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Payment Date</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var payment in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @payment.Student?.Name
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        RM @payment.Amount
+                                    </td>
+
+                                    <td>
+                                        @payment.PaymentDate.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        @payment.PaymentMethod
+                                    </td>
+
+                                    <td>
+
+                                        @if (payment.Status == "Paid")
+                                        {
+                                            <span class="badge bg-success">
+                                                Paid
+                                            </span>
+                                        }
+                                        else if (payment.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @payment.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    // ==========================================
+    // Pie Chart - Payment Status
+    // ==========================================
+
+    const paymentStatusLabels =
+        @Html.Raw(ViewBag.PaymentStatusLabels);
+
+    const paymentStatusData =
+        @Html.Raw(ViewBag.PaymentStatusData);
+
+
+    new Chart(
+        document.getElementById('paymentStatusChart'),
+        {
+            type: 'pie',
+
+            data: {
+                labels: paymentStatusLabels,
+
+                datasets: [
+                    {
+                        data: paymentStatusData,
+
+                        backgroundColor: [
+                            '#198754',
+                            '#ffc107'
+                        ],
+
+                        borderWidth: 1
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        }
+    );
+
+
+    // ==========================================
+    // Bar Chart - Revenue by Payment Method
+    // ==========================================
+
+    const paymentMethodLabels =
+        @Html.Raw(ViewBag.PaymentMethodLabels);
+
+    const paymentMethodData =
+        @Html.Raw(ViewBag.PaymentMethodData);
+
+
+    new Chart(
+        document.getElementById('revenueMethodChart'),
+        {
+            type: 'bar',
+
+            data: {
+                labels: paymentMethodLabels,
+
+                datasets: [
+                    {
+                        label: 'Revenue (RM)',
+
+                        data: paymentMethodData,
+
+                        backgroundColor: '#6f9bd2',
+
+                        borderWidth: 1
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            callback: function (value) {
+                                return 'RM ' + value;
+                            }
+                        }
+                    }
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        }
+    );
+
+</script>

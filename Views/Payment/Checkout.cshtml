@@ -1,0 +1,235 @@
+@model TutionCenter.Models.PaymentCheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Secure Payment Checkout</h3>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Payment Summary -->
+                <div class="alert alert-light border">
+                    <strong>@Model.Description</strong>
+                    <br />
+                    Amount payable:
+                    <strong>RM @Model.Amount.ToString("0.00")</strong>
+                </div>
+
+                <form asp-action="Checkout" method="post">
+
+                    <input asp-for="BillId" type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="mb-3">
+                        <label asp-for="PaymentMethod"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="PaymentMethod"
+                                class="form-select"
+                                id="paymentMethod">
+
+                            <option value="">
+                                -- Select payment method --
+                            </option>
+
+                            <option value="Online Banking">
+                                Online Banking
+                            </option>
+
+                            <option value="Credit/Debit Card">
+                                Credit/Debit Card
+                            </option>
+
+                            <option value="E-Wallet">
+                                E-Wallet
+                            </option>
+
+                        </select>
+                        <span asp-validation-for="PaymentMethod"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <!-- Online Banking -->
+                    <div id="bankFields"
+                         class="payment-fields">
+
+                        <label class="form-label">
+                            Bank
+                        </label>
+
+                        <select asp-for="Bank"
+                                class="form-select mb-2">
+
+                            <option value="">
+                                Select bank
+                            </option>
+
+                            <option value="Maybank2u">
+                                Maybank2u
+                            </option>
+
+                            <option value="CIMB Clicks">
+                                CIMB Clicks
+                            </option>
+
+                            <option value="Public Bank">
+                                Public Bank
+                            </option>
+
+                        </select>
+
+                        <input asp-for="BankLoginId"
+                               class="form-control"
+                               placeholder="Simulated login ID" />
+                    </div>
+
+                    <!-- Credit / Debit Card -->
+                    <div id="cardFields"
+                         class="payment-fields">
+
+                        <input asp-for="CardNumber"
+                               class="form-control mb-2"
+                               placeholder="Card number"
+                               maxlength="19"
+                               inputmode="numeric" />
+
+                        <input asp-for="CardHolder"
+                               class="form-control mb-2"
+                               placeholder="Card holder name" />
+
+                        <div class="row">
+
+                            <!-- Expiry Date -->
+                            <div class="col">
+                                <label asp-for="ExpiryDate"
+                                       class="form-label">
+                                    Expiry Date
+                                </label>
+
+                                <input asp-for="ExpiryDate"
+                                       type="month"
+                                       class="form-control"
+                                       min="@DateTime.Now.ToString("yyyy-MM")" />
+                            </div>
+
+                            <!-- CVV -->
+                            <div class="col">
+                                <label asp-for="Cvv"
+                                       class="form-label">
+                                    CVV
+                                </label>
+
+                                <input asp-for="Cvv"
+                                       type="password"
+                                       class="form-control"
+                                       placeholder="CVV"
+                                       maxlength="4" />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- E-Wallet -->
+                    <div id="walletFields"
+                         class="payment-fields">
+
+                        <select asp-for="Wallet"
+                                class="form-select mb-2">
+
+                            <option value="">
+                                Select wallet
+                            </option>
+
+                            <option value="Touch 'n Go eWallet">
+                                Touch 'n Go eWallet
+                            </option>
+
+                            <option value="GrabPay">
+                                GrabPay
+                            </option>
+
+                            <option value="Boost">
+                                Boost
+                            </option>
+
+                        </select>
+
+                        <input asp-for="PhoneNumber"
+                               class="form-control"
+                               placeholder="Wallet phone number" />
+                    </div>
+
+                    <!-- Information -->
+                    <p class="text-muted small mt-3">
+                        This is a simulated payment.
+                        Card CVV, passwords and bank credentials
+                        are not stored.
+                    </p>
+
+                    <!-- Buttons -->
+                    <button type="submit"
+                            class="btn btn-success">
+                        Confirm Payment
+                    </button>
+
+                    <a asp-action="Bills"
+                       class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-fields {
+        display: none;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+    const method = document.getElementById("paymentMethod");
+
+    function showFields() {
+
+        document
+            .querySelectorAll(".payment-fields")
+            .forEach(x => x.style.display = "none");
+
+        if (method.value === "Online Banking") {
+            document.getElementById("bankFields").style.display = "block";
+        }
+
+        if (method.value === "Credit/Debit Card") {
+            document.getElementById("cardFields").style.display = "block";
+        }
+
+        if (method.value === "E-Wallet") {
+            document.getElementById("walletFields").style.display = "block";
+        }
+    }
+
+    method.addEventListener("change", showFields);
+
+    showFields();
+</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

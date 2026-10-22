@@ -1,0 +1,127 @@
+﻿@model IEnumerable<TutionCenter.Models.Attendance>
+
+@{
+    // 判断目前登录用户是不是 Student
+    bool isStudent =
+        User.IsInRole("Student");
+
+    // Admin 和 Teacher 才可以修改 Attendance
+    bool canEdit =
+        User.IsInRole("Admin") ||
+        User.IsInRole("Teacher");
+
+    // 根据角色决定空记录的 colspan
+    int emptyColumnCount =
+        isStudent ? 4 : 6;
+}
+
+@if (Model.Any())
+{
+    @foreach (var item in Model)
+    {
+        // 根据 Attendance Status 决定 Badge 颜色
+        string badgeClass =
+            item.Status switch
+            {
+                "Present" => "bg-success",
+                "Late" => "bg-warning text-dark",
+                "Absent" => "bg-danger",
+                _ => "bg-secondary"
+            };
+
+        <tr>
+
+            @* Admin 和 Teacher 才显示 Student *@
+            @if (!isStudent)
+            {
+                <td class="ps-4">
+
+                    <div class="fw-semibold">
+                        @item.Student?.Name
+                    </div>
+
+                    <small class="text-muted">
+                        @item.Student?.Email
+                    </small>
+
+                </td>
+            }
+
+            @* Attendance 日期 *@
+            <td class="@(isStudent ? "ps-4" : "")">
+                @item.AttendanceDate.ToString("dd/MM/yyyy")
+            </td>
+
+            @* Attendance Status *@
+            <td>
+
+                <span class="badge @badgeClass">
+                    @item.Status
+                </span>
+
+            </td>
+
+            @* Student 实际签到时间 *@
+            <td>
+
+                @if (item.CheckInTime.HasValue)
+                {
+                    <span>
+                        @item.CheckInTime.Value.ToString("hh:mm tt")
+                    </span>
+                }
+                else
+                {
+                    <span class="text-muted">
+                        -
+                    </span>
+                }
+
+            </td>
+
+            @* Remarks *@
+            <td>
+
+                @(string.IsNullOrWhiteSpace(item.Remarks)
+                    ? "-"
+                    : item.Remarks)
+
+            </td>
+
+            @* Admin 和 Teacher 可以 Edit *@
+            @if (canEdit)
+            {
+                <td class="text-end pe-4">
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-primary attendance-edit-btn">
+
+                        ✏ Edit
+                    </a>
+
+                </td>
+            }
+
+        </tr>
+    }
+}
+else
+{
+    <tr>
+
+        <td colspan="@emptyColumnCount"
+            class="text-center py-5">
+
+            <h5 class="fw-bold">
+                No attendance records found
+            </h5>
+
+            <p class="text-muted mb-0">
+                No records match the current search or filter.
+            </p>
+
+        </td>
+
+    </tr>
+}

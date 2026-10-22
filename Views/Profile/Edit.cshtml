@@ -1,0 +1,325 @@
+﻿@model TutionCenter.Models.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+
+ <style >
+        /* 整个 Edit 页面 */
+        .edit-profile-page {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* 标题 */
+        .edit-title {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+            font-size: 28px;
+        }
+
+        .edit-title-line {
+            width: 95px;
+            height: 3px;
+            background: #0d6efd;
+            border-radius: 30px;
+            margin-bottom: 18px;
+        }
+
+        /* Card */
+        .edit-card {
+            border: 1px solid #dbeafe;
+            border-radius: 14px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 6px 18px rgba(13,110,253,.08);
+        }
+
+        /* Header */
+        .edit-header {
+            background: linear-gradient(135deg,#edf6ff,#f8fbff);
+            padding: 22px;
+            text-align: center;
+        }
+
+        /* 有头像 */
+        .edit-avatar {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+            background: #dbeafe;
+        }
+
+        /* 默认头像 */
+        .edit-avatar-placeholder {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: linear-gradient(145deg,#dbeafe,#bfdbfe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+            font-size: 48px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        }
+
+        /* Body */
+        .edit-card-body {
+            padding: 24px;
+        }
+
+        /* Label */
+        .edit-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        /* Input */
+        .edit-input {
+            min-height: 44px;
+            border-radius: 9px;
+            border: 1px solid #d1d5db;
+            font-size: 15px;
+        }
+
+            .edit-input:focus {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 .15rem rgba(13,110,253,.15);
+            }
+
+        /* Readonly */
+        .readonly-input {
+            background: #f5f5f5;
+        }
+
+        /* Save */
+        .save-profile-btn {
+            min-height: 44px;
+            border-radius: 9px;
+            font-weight: 600;
+        }
+
+        /* Cancel */
+        .cancel-profile-btn {
+            min-height: 44px;
+            border-radius: 9px;
+            font-weight: 600;
+        }
+
+        /* 提示文字 */
+        small.text-muted {
+            font-size: 13px;
+        }
+
+</style>
+
+
+<div class="edit-profile-page">
+
+    <h2 class="edit-title">Edit Profile</h2>
+    <div class="edit-title-line"></div>
+
+    <div class="edit-card">
+
+        @* Edit Profile 顶部浅蓝区域 *@
+        <div class="edit-header">
+
+            @if (string.IsNullOrEmpty(Model.ProfileImage))
+            {
+                <div class="edit-avatar-placeholder">
+                    👤
+                </div>
+            }
+            else
+            {
+                <img src="@Model.ProfileImage"
+                     alt="Profile Image"
+                     class="edit-avatar" />
+            }
+
+            <h4 class="fw-bold mt-3 mb-1">
+                Update Your Profile
+            </h4>
+
+            <p class="text-muted mb-0">
+                Manage your personal information below.
+            </p>
+
+        </div>
+
+        <div class="edit-card-body">
+
+            @* 表单提交到 ProfileController 的 Edit POST *@
+            <form asp-controller="Profile"
+                  asp-action="Edit"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @* 隐藏用户 Id *@
+                <input asp-for="Id" type="hidden" />
+
+                @* 显示验证错误 *@
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+                @* Full Name *@
+                <div class="mb-4">
+                    <label asp-for="Name"
+                           class="form-label edit-label">
+                    </label>
+
+                    <input asp-for="Name"
+                           class="form-control edit-input"
+                           placeholder="Enter your full name" />
+
+                    <span asp-validation-for="Name"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                @* Email 只显示，不允许修改 *@
+                <div class="mb-4">
+                    <label asp-for="Email"
+                           class="form-label edit-label">
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control edit-input readonly-input"
+                           readonly />
+
+                    <small class="text-muted">
+                        Email cannot be changed here.
+                    </small>
+                </div>
+
+                @* Role 只显示，不允许用户修改 *@
+                <div class="mb-4">
+                    <label asp-for="Role"
+                           class="form-label edit-label">
+                    </label>
+
+                    <input asp-for="Role"
+                           class="form-control edit-input readonly-input"
+                           readonly />
+
+                    <small class="text-muted">
+                        Role can only be managed by the administrator.
+                    </small>
+                </div>
+
+                @* Phone Number *@
+                <div class="mb-4">
+                    <label asp-for="PhoneNumber"
+                           class="form-label edit-label">
+                    </label>
+
+                    <input asp-for="PhoneNumber"
+                           class="form-control edit-input"
+                           placeholder="Example: 0123456789" />
+
+                    <span asp-validation-for="PhoneNumber"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                @* Date of Birth *@
+                <div class="mb-4">
+                    <label asp-for="DateOfBirth"
+                           class="form-label edit-label">
+                    </label>
+
+                    <input asp-for="DateOfBirth"
+                           type="date"
+                           class="form-control edit-input" />
+
+                    <span asp-validation-for="DateOfBirth"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                @* Gender *@
+                <div class="mb-4">
+                    <label asp-for="Gender"
+                           class="form-label edit-label">
+                    </label>
+
+                    <select asp-for="Gender"
+                            class="form-select edit-input">
+
+                        <option value="">
+                            Please Select
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="Gender"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                @* Profile Image 路径或网址 *@
+                <div class="mb-4">
+
+                    <label class="form-label edit-label">
+                        Profile Image
+                    </label>
+
+                    <input type="file"
+                           name="profilePhoto"
+                           class="form-control edit-input"
+                           accept="image/*" />
+
+                    <small class="text-muted">
+                        JPG, PNG or JPEG only.
+                    </small>
+
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary save-profile-btn">
+                        💾 Save Changes
+                    </button>
+
+                    <a asp-controller="Profile"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary cancel-profile-btn">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    @* 启用前端验证 *@
+    <partial name="_ValidationScriptsPartial" />
+}

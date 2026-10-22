@@ -1,0 +1,174 @@
+﻿@model TutionCenter.Models.Attendance
+
+@{
+    ViewData["Title"] = "Edit Attendance";
+}
+
+<div class="container">
+
+    <!-- 页面标题 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                Attendance Management
+            </h2>
+
+            <p class="text-muted mb-0">
+                Update the student's attendance record.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Card -->
+    <div class="card shadow-sm border-0">
+
+        <!-- 浅蓝 Header -->
+        <div class="card-header"
+             style="background:#cfe2ff;">
+
+            <h5 class="mb-0 fw-bold">
+                Edit Attendance
+            </h5>
+
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+
+            <!-- 提交到 AttendanceController Edit(Post) -->
+            <form asp-action="Edit"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <!-- 隐藏 Attendance Id -->
+                <input asp-for="Id"
+                       type="hidden" />
+
+                <!-- 显示验证错误 -->
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <!-- Student -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Student
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.Student?.Name"
+                           readonly />
+
+                </div>
+
+                <!-- Class -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Class
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.TuitionClass?.ClassCode"
+                           readonly />
+
+                </div>
+
+                <!-- Attendance Date -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Attendance Date
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.AttendanceDate.ToString("dd/MM/yyyy")"
+                           readonly />
+
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Status
+                    </label>
+
+                    <select name="status"
+                            class="form-select">
+
+                        @if (Model.Status == "Present")
+                        {
+                            <option value="Present" selected>Present</option>
+                        }
+                        else
+                        {
+                            <option value="Present">Present</option>
+                        }
+
+                        @if (Model.Status == "Late")
+                        {
+                            <option value="Late" selected>Late</option>
+                        }
+                        else
+                        {
+                            <option value="Late">Late</option>
+                        }
+
+                        @if (Model.Status == "Absent")
+                        {
+                            <option value="Absent" selected>Absent</option>
+                        }
+                        else
+                        {
+                            <option value="Absent">Absent</option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <!-- Remarks -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Remarks
+                    </label>
+
+                    <textarea name="remarks"
+                              class="form-control"
+                              rows="3">@Model.Remarks</textarea>
+
+                </div>
+
+                <!-- Button -->
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        💾 Save Changes
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

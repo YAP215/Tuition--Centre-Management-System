@@ -1,0 +1,98 @@
+﻿@model TutionCenter.Models.LoginViewModel
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["VerificationLink"] != null)
+{
+    <div class="alert alert-warning">
+        <strong>Development test link:</strong>
+        <a href="@TempData["VerificationLink"]">Verify this new account</a>
+    </div>
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-5">
+
+        <div class="card shadow-lg mt-5">
+
+            <div class="card-header bg-primary text-white text-center">
+                <h3>🎓 Tuition Center System</h3>
+            </div>
+
+            <div class="card-body">
+
+                <h4 class="text-center mb-4">Login</h4>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert alert-danger">
+                        @ViewBag.Message
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               placeholder="Enter your password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            What is @ViewBag.Num1 + @ViewBag.Num2 ?
+                        </label>
+
+                        <input asp-for="CaptchaAnswer" class="form-control" />
+
+                        <span asp-validation-for="CaptchaAnswer" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            🔐 Login
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a asp-controller="Account"
+                           asp-action="ForgotPassword"
+                           class="text-decoration-none">
+                            Forgot Password?
+                        </a>
+
+                        <br />
+
+                        <span>Don't have an account?</span>
+
+                        <a asp-controller="Account"
+                           asp-action="Register">
+                            Register
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

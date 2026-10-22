@@ -1,0 +1,319 @@
+﻿@model TutionCenter.Models.AttendanceCreateViewModel
+
+@{
+    ViewData["Title"] = "Mark Attendance";
+}
+
+<style>
+    /* 整个 Mark Attendance 页面 */
+    .attendance-create-page {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    /* 页面标题 */
+    .attendance-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    .attendance-title-line {
+        width: 120px;
+        height: 3px;
+        background: #0d6efd;
+        border-radius: 20px;
+        margin-bottom: 18px;
+    }
+
+    /* Card */
+    .attendance-card {
+        background: white;
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 6px 18px rgba(13, 110, 253, 0.08);
+    }
+
+    /* 顶部浅蓝区域 */
+    .attendance-card-header {
+        background: linear-gradient(135deg, #edf6ff, #f8fbff);
+        padding: 22px;
+        text-align: center;
+    }
+
+    .attendance-header-icon {
+        width: 62px;
+        height: 62px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+    }
+
+    .attendance-card-body {
+        padding: 24px;
+    }
+
+    /* Label */
+    .attendance-label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 15px;
+        margin-bottom: 6px;
+    }
+
+    /* Input */
+    .attendance-input {
+        min-height: 44px;
+        border-radius: 9px;
+        border: 1px solid #d1d5db;
+        font-size: 15px;
+    }
+
+        .attendance-input:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .15);
+        }
+
+    /* Status options */
+    .status-option {
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 12px 15px;
+        background: #ffffff;
+    }
+
+    /* Save button */
+    .attendance-save-btn {
+        min-height: 44px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    /* Cancel button */
+    .attendance-cancel-btn {
+        min-height: 44px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="attendance-create-page">
+
+    <h2 class="attendance-title">
+        Mark Attendance
+    </h2>
+
+    <div class="attendance-title-line"></div>
+
+    <div class="attendance-card">
+
+        <div class="attendance-card-header">
+
+            <div class="attendance-header-icon">
+                📝
+            </div>
+
+            <h4 class="fw-bold mt-3 mb-1">
+                New Attendance Record
+            </h4>
+
+            <p class="text-muted mb-0">
+                Select a student, class and attendance status.
+            </p>
+
+        </div>
+
+        <div class="attendance-card-body">
+
+            <form asp-controller="Attendance"
+                  asp-action="Create"
+                  method="post">
+
+                @* 显示所有表单错误 *@
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+                @* Student *@
+                <div class="mb-4">
+
+                    <label asp-for="StudentId"
+                           class="form-label attendance-label">
+                    </label>
+
+                    <select asp-for="StudentId"
+                            asp-items="ViewBag.Students"
+                            class="form-select attendance-input">
+
+                        <option value="">
+                            -- Select Student --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="StudentId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                @* Class *@
+                <div class="mb-4">
+
+                    <label asp-for="TuitionClassId"
+                           class="form-label attendance-label">
+                    </label>
+
+                    <select asp-for="TuitionClassId"
+                            asp-items="ViewBag.Classes"
+                            class="form-select attendance-input">
+
+                        <option value="">
+                            -- Select Class --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="TuitionClassId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                @* Attendance Date *@
+                <div class="mb-4">
+
+                    <label asp-for="AttendanceDate"
+                           class="form-label attendance-label">
+                    </label>
+
+                    <input asp-for="AttendanceDate"
+                           type="date"
+                           class="form-control attendance-input" />
+
+                    <span asp-validation-for="AttendanceDate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                @* Status *@
+                <div class="mb-4">
+
+                    <label asp-for="Status"
+                           class="form-label attendance-label">
+                    </label>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-4">
+                            <div class="status-option">
+
+                                <input asp-for="Status"
+                                       type="radio"
+                                       value="Present"
+                                       id="statusPresent"
+                                       class="form-check-input" />
+
+                                <label for="statusPresent"
+                                       class="form-check-label ms-2">
+                                    Present
+                                </label>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="status-option">
+
+                                <input asp-for="Status"
+                                       type="radio"
+                                       value="Absent"
+                                       id="statusAbsent"
+                                       class="form-check-input" />
+
+                                <label for="statusAbsent"
+                                       class="form-check-label ms-2">
+                                    Absent
+                                </label>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="status-option">
+
+                                <input asp-for="Status"
+                                       type="radio"
+                                       value="Late"
+                                       id="statusLate"
+                                       class="form-check-input" />
+
+                                <label for="statusLate"
+                                       class="form-check-label ms-2">
+                                    Late
+                                </label>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <span asp-validation-for="Status"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                @* Remarks *@
+                <div class="mb-4">
+
+                    <label asp-for="Remarks"
+                           class="form-label attendance-label">
+                    </label>
+
+                    <textarea asp-for="Remarks"
+                              class="form-control"
+                              rows="3"
+                              maxlength="300"
+                              placeholder="Optional remarks"></textarea>
+
+                    <span asp-validation-for="Remarks"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                @* Buttons *@
+                <div class="d-grid gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary attendance-save-btn">
+                        Save Attendance
+                    </button>
+
+                    <a asp-controller="Attendance"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary attendance-cancel-btn">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,239 @@
+﻿@model TutionCenter.Models.AttendanceSession
+
+@{
+    ViewData["Title"] = "Attendance Code Details";
+
+    // 判断 Attendance Code 是否已经过期
+    bool isExpired = Model.ExpiresAt <= DateTime.Now;
+
+    // 判断 Attendance Code 是否仍然有效
+    bool isActive = Model.IsActive && !isExpired;
+}
+
+<div class="container py-4">
+
+    <!-- // 页面上方标题和返回按钮 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Attendance Code Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                View the attendance code and student check-in records.
+            </p>
+        </div>
+
+        <!-- // 返回 Attendance Code 列表 -->
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back
+        </a>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- // 左边：Attendance Code 资料 -->
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4 text-center">
+
+                    <!-- // 显示班级科目名称 -->
+                    <h5 class="fw-bold mb-1">
+                        @Model.TuitionClass?.Subject?.Name
+                    </h5>
+
+                    <!-- // 显示班级编号 -->
+                    <p class="text-muted mb-4">
+                        @Model.TuitionClass?.ClassCode
+                    </p>
+
+                    <!-- // 显示六位数签到码 -->
+                    <div class="border rounded py-4 mb-4">
+
+                        <p class="text-muted mb-2">
+                            Attendance Code
+                        </p>
+
+                        <div class="display-4 fw-bold">
+                            @Model.AttendanceCode
+                        </div>
+
+                    </div>
+
+                    <!-- // 显示签到码状态 -->
+                    <div class="mb-4">
+
+                        @if (isActive)
+                        {
+                            <span class="badge bg-success fs-6">
+                                Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-6">
+                                Closed / Expired
+                            </span>
+                        }
+
+                    </div>
+
+                    <!-- // 显示建立时间 -->
+                    <div class="text-start mb-3">
+
+                        <label class="text-muted small">
+                            Created At
+                        </label>
+
+                        <div class="fw-semibold">
+                            @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                        </div>
+
+                    </div>
+
+                    <!-- // 显示过期时间 -->
+                    <div class="text-start mb-3">
+
+                        <label class="text-muted small">
+                            Expires At
+                        </label>
+
+                        <div class="fw-semibold">
+                            @Model.ExpiresAt.ToString("dd MMM yyyy, hh:mm tt")
+                        </div>
+
+                    </div>
+
+                    <!-- // 显示签到人数 -->
+                    <div class="text-start">
+
+                        <label class="text-muted small">
+                            Total Check-ins
+                        </label>
+
+                        <div class="fw-semibold">
+                            @Model.Attendances.Count student(s)
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- // 右边：学生签到记录 -->
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white py-3">
+
+                    <h5 class="fw-bold mb-0">
+                        Student Check-ins
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.Attendances == null ||
+                         !Model.Attendances.Any())
+                    {
+                        <!-- // 没有学生签到时显示 -->
+                        <div class="text-center py-5">
+
+                            <h6>No student has checked in yet.</h6>
+
+                            <p class="text-muted mb-0">
+                                Student check-in records will appear here.
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- // 显示学生签到记录表格 -->
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+                                        <th class="ps-4">Student</th>
+                                        <th>Email</th>
+                                        <th>Check-in Time</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var attendance in
+                                              Model.Attendances
+                                                  .OrderBy(a => a.CheckInTime))
+                                    {
+                                        <tr>
+
+                                            <!-- // 学生姓名 -->
+                                            <td class="ps-4 fw-semibold">
+                                                @attendance.Student?.Name
+                                            </td>
+
+                                            <!-- // 学生 Email -->
+                                            <td>
+                                                @attendance.Student?.Email
+                                            </td>
+
+                                            <!-- // 学生签到时间 -->
+                                            <td>
+                                                @if (attendance.CheckInTime.HasValue)
+                                                {
+                                                    <!-- // 显示学生签到日期和时间 -->
+                                                    <span>
+                                                        @attendance.CheckInTime.Value.ToString("dd MMM yyyy, hh:mm tt")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <!-- // 没有签到时间时显示横线 -->
+                                                    <span class="text-muted">
+                                                        -
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            <!-- // Attendance 状态 -->
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    @attendance.Status
+                                                </span>
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

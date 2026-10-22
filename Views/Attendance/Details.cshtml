@@ -1,0 +1,834 @@
+﻿@model TutionCenter.Models.AttendanceDetailsViewModel
+
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Attendance Details";
+
+    // 把月份数字转换成月份名称
+    string monthName =
+        CultureInfo.CurrentCulture
+            .DateTimeFormat
+            .GetMonthName(Model.SelectedMonth);
+
+    // 判断目前登录用户是不是 Student
+    bool isStudent =
+        User.IsInRole("Student");
+
+    // Admin 和 Teacher 才可以修改 Attendance
+    bool canEdit =
+        User.IsInRole("Admin") ||
+        User.IsInRole("Teacher");
+
+    // 当前选择的日期，供 AJAX 使用
+    string selectedDateValue =
+        Model.SelectedDate.HasValue
+            ? Model.SelectedDate.Value.ToString("yyyy-MM-dd")
+            : "";
+}
+
+<style>
+    /* Statistics 整体外框 */
+    .attendance-summary-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 16px;
+    }
+
+    /* Statistics 标题 */
+    .attendance-summary-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    /* Statistics 说明 */
+    .attendance-summary-description {
+        font-size: 13px;
+        margin-bottom: 14px;
+    }
+
+    /* 四个统计小格 */
+    .attendance-mini-card {
+        min-height: 62px;
+        padding: 9px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 7px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: #ffffff;
+    }
+
+    /* 小格标题 */
+    .attendance-mini-label {
+        color: #6c757d;
+        font-size: 12px;
+        line-height: 1.1;
+        margin-bottom: 5px;
+    }
+
+    /* 小格数字 */
+    .attendance-summary-number {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* Chart 容器 */
+    .attendance-chart-wrapper {
+        width: 115px;
+        height: 115px;
+        margin: 0 auto;
+    }
+
+    /* Percentage 区域 */
+    .attendance-percentage-area {
+        margin-top: 14px;
+    }
+
+    /* Percentage 标题 */
+    .attendance-percentage-label {
+        font-size: 13px;
+    }
+
+    /* Percentage progress bar */
+    .attendance-detail-progress {
+        height: 6px;
+        border-radius: 20px;
+        background-color: #e9ecef;
+    }
+
+        .attendance-detail-progress .progress-bar {
+            border-radius: 20px;
+        }
+
+    /* Percentage 说明 */
+    .attendance-percentage-note {
+        font-size: 11px;
+    }
+
+    /* Edit 按钮不换行 */
+    .attendance-edit-btn {
+        white-space: nowrap;
+    }
+
+    /* AJAX Loading 提示 */
+    .attendance-loading {
+        display: none;
+        font-size: 13px;
+    }
+
+    .download-pdf-btn {
+        background: #cfe2ff;
+        border: 1px solid #b6d4fe;
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .download-pdf-btn:hover {
+        background: #b6d4fe;
+        color: #0a58ca;
+     
+    }
+</style>
+
+<div class="container">
+
+    @* =========================================================
+       页面标题
+       ========================================================= *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                Attendance Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                @Model.SubjectName -
+                @Model.ClassCode |
+                @monthName @Model.SelectedYear
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="DownloadPdf"
+               asp-route-tuitionClassId="@Model.TuitionClassId"
+               asp-route-month="@Model.SelectedMonth"
+               asp-route-year="@Model.SelectedYear"
+               class="btn download-pdf-btn">
+
+                📄 Download PDF
+            </a>
+
+            <a asp-action="Index"
+               asp-route-month="@Model.SelectedMonth"
+               asp-route-year="@Model.SelectedYear"
+               class="btn btn-outline-secondary">
+
+                Back to Attendance Records
+            </a>
+
+        </div>
+
+    </div>
+
+    @* =========================================================
+       Subject、Class 和 Month 资料
+       ========================================================= *@
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3 mb-md-0">
+
+                    <small class="text-muted">
+                        Subject
+                    </small>
+
+                    <div class="fw-bold">
+                        @Model.SubjectCode -
+                        @Model.SubjectName
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3 mb-md-0">
+
+                    <small class="text-muted">
+                        Class
+                    </small>
+
+                    <div class="fw-bold">
+                        @Model.ClassCode
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted">
+                        Month
+                    </small>
+
+                    <div class="fw-bold">
+                        @monthName @Model.SelectedYear
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @* =========================================================
+       日期筛选
+       ========================================================= *@
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <form asp-action="Details"
+                  method="get"
+                  class="row g-3 align-items-end">
+
+                <input type="hidden"
+                       name="tuitionClassId"
+                       value="@Model.TuitionClassId" />
+
+                <input type="hidden"
+                       name="month"
+                       value="@Model.SelectedMonth" />
+
+                <input type="hidden"
+                       name="year"
+                       value="@Model.SelectedYear" />
+
+                <div class="col-md-8">
+
+                    <label class="form-label fw-semibold">
+                        Attendance Date
+                    </label>
+
+                    <select name="selectedDate"
+                            class="form-select">
+
+                        @if (!Model.SelectedDate.HasValue)
+                        {
+                            <option value="" selected>
+                                All Dates
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="">
+                                All Dates
+                            </option>
+                        }
+
+                        @foreach (DateTime date in Model.AvailableDates)
+                        {
+                            string dateValue =
+                                date.ToString("yyyy-MM-dd");
+
+                            string dateDisplay =
+                                date.ToString("dd MMMM yyyy");
+
+                            if (Model.SelectedDate.HasValue &&
+                                Model.SelectedDate.Value.Date == date.Date)
+                            {
+                                <option value="@dateValue" selected>
+                                    @dateDisplay
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@dateValue">
+                                    @dateDisplay
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+
+                        Filter Date
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    @* =========================================================
+       Attendance Statistics Chart
+       ========================================================= *@
+    <div class="attendance-summary-card shadow-sm mb-4">
+
+        <div class="row align-items-center">
+
+            @* 左边 Statistics *@
+            <div class="col-lg-9 mb-3 mb-lg-0">
+
+                <h5 class="attendance-summary-title">
+                    Attendance Statistics
+                </h5>
+
+                <p class="text-muted attendance-summary-description">
+                    Attendance summary for
+                    @Model.SubjectName in
+                    @monthName @Model.SelectedYear.
+                </p>
+
+                <div class="row g-2">
+
+                    <div class="col-6">
+
+                        <div class="attendance-mini-card">
+
+                            <div class="attendance-mini-label">
+                                Total Records
+                            </div>
+
+                            <div class="attendance-summary-number text-primary">
+                                @Model.TotalRecords
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <div class="attendance-mini-card">
+
+                            <div class="attendance-mini-label">
+                                Present
+                            </div>
+
+                            <div class="attendance-summary-number text-success">
+                                @Model.PresentCount
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <div class="attendance-mini-card">
+
+                            <div class="attendance-mini-label">
+                                Late
+                            </div>
+
+                            <div class="attendance-summary-number text-warning">
+                                @Model.LateCount
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <div class="attendance-mini-card">
+
+                            <div class="attendance-mini-label">
+                                Absent
+                            </div>
+
+                            <div class="attendance-summary-number text-danger">
+                                @Model.AbsentCount
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                @* Attendance Percentage *@
+                <div class="attendance-percentage-area">
+
+                    <div class="d-flex justify-content-between mb-1">
+
+                        <span class="fw-semibold attendance-percentage-label">
+                            Attendance Percentage
+                        </span>
+
+                        <strong class="text-primary attendance-percentage-label">
+                            @Model.AttendancePercentage.ToString("0.0")%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress attendance-detail-progress">
+
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width:@Model.AttendancePercentage%;"
+                             aria-valuenow="@Model.AttendancePercentage"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+
+                    </div>
+
+                    <small class="text-muted attendance-percentage-note">
+                        Present and Late are counted as attended.
+                    </small>
+
+                </div>
+
+            </div>
+
+            @* 右边 Doughnut Chart *@
+            <div class="col-lg-3 d-flex justify-content-center align-items-center">
+
+                <div class="attendance-chart-wrapper">
+                    <canvas id="attendanceDetailChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @* =========================================================
+       Additional Feature：AJAX Search 和 Status Filter
+       ========================================================= *@
+    <div class="card shadow-sm border-0 mb-3">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                @* Admin / Teacher 才显示 Student Search *@
+                @if (!isStudent)
+                {
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Search Student
+                        </label>
+
+                        <input type="text"
+                               id="studentSearch"
+                               class="form-control"
+                               placeholder="Enter student name or email..." />
+
+                    </div>
+                }
+
+                <div class="@(isStudent ? "col-md-12" : "col-md-6")">
+
+                    <label class="form-label fw-semibold">
+                        Attendance Status
+                    </label>
+
+                    <select id="statusFilter"
+                            class="form-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Present">
+                            Present
+                        </option>
+
+                        <option value="Late">
+                            Late
+                        </option>
+
+                        <option value="Absent">
+                            Absent
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div id="attendanceLoading"
+                 class="attendance-loading text-primary mt-3">
+
+                Searching attendance records...
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @* =========================================================
+       Attendance History
+       ========================================================= *@
+    <div class="card shadow-sm border-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        @if (!isStudent)
+                        {
+                            <th class="ps-4"
+                                style="background:#cfe2ff;">
+                                Student
+                            </th>
+                        }
+
+                        <th class="@(isStudent ? "ps-4" : "")"
+                            style="background:#cfe2ff;">
+                            Date
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Status
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Check-in Time
+                        </th>
+
+                        <th style="background:#cfe2ff;">
+                            Remarks
+                        </th>
+
+                        @if (canEdit)
+                        {
+                            <th class="text-end pe-4"
+                                style="background:#cfe2ff;">
+                                Action
+                            </th>
+                        }
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="attendanceTableBody">
+
+                    @await Html.PartialAsync(
+                        "_AttendanceRows",
+                        Model.Records)
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    @* Chart.js Library *@
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // =========================================================
+        // Attendance Doughnut Chart
+        // =========================================================
+
+        const attendanceDetailCanvas =
+            document.getElementById("attendanceDetailChart");
+
+        if (attendanceDetailCanvas) {
+
+            new Chart(attendanceDetailCanvas, {
+                type: "doughnut",
+
+                data: {
+                    labels: [
+                        "Present",
+                        "Late",
+                        "Absent"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                        @Model.PresentCount,
+                                        @Model.LateCount,
+                                @Model.AbsentCount
+                            ],
+
+                            backgroundColor: [
+                                "#198754",
+                                "#ffc107",
+                                "#dc3545"
+                            ],
+
+                            borderColor: [
+                                "#ffffff",
+                                "#ffffff",
+                                "#ffffff"
+                            ],
+
+                            borderWidth: 2
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "65%",
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+
+                            labels: {
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 7,
+
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+
+                                    const values =
+                                        context.dataset.data;
+
+                                    const total =
+                                        values.reduce(
+                                            (sum, value) =>
+                                                sum + value,
+                                            0
+                                        );
+
+                                    const currentValue =
+                                        context.raw;
+
+                                    const percentage =
+                                        total === 0
+                                            ? 0
+                                            : (
+                                                currentValue *
+                                                100 /
+                                                total
+                                            ).toFixed(1);
+
+                                    return (
+                                        context.label +
+                                        ": " +
+                                        currentValue +
+                                        " (" +
+                                        percentage +
+                                        "%)"
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================
+        // Additional Feature：AJAX Search 和 Status Filter
+        // =========================================================
+
+        const studentSearch =
+            document.getElementById("studentSearch");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+        const attendanceTableBody =
+            document.getElementById("attendanceTableBody");
+
+        const attendanceLoading =
+            document.getElementById("attendanceLoading");
+
+        // 防止用户快速输入时发送太多请求
+        let searchTimer;
+
+        // 使用 AJAX 取得筛选后的 Attendance Rows
+        async function filterAttendanceRecords() {
+
+            // Student 页面没有 Search Student 输入框
+            const searchValue =
+                studentSearch
+                    ? studentSearch.value.trim()
+                    : "";
+
+            const statusValue =
+                statusFilter
+                    ? statusFilter.value
+                    : "";
+
+            const parameters =
+                new URLSearchParams({
+                    tuitionClassId:
+                        "@Model.TuitionClassId",
+
+                    month:
+                        "@Model.SelectedMonth",
+
+                    year:
+                        "@Model.SelectedYear",
+
+                    selectedDate:
+                        "@selectedDateValue",
+
+                    search:
+                        searchValue,
+
+                    status:
+                        statusValue
+                });
+
+            attendanceLoading.style.display =
+                "block";
+
+            try {
+
+                const response =
+                    await fetch(
+                        '@Url.Action("FilterDetails", "Attendance")?' +
+                        parameters.toString(),
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            }
+                        }
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to filter attendance records."
+                    );
+                }
+
+                const html =
+                    await response.text();
+
+                attendanceTableBody.innerHTML =
+                    html;
+            }
+            catch (error) {
+
+                console.error(error);
+
+                attendanceTableBody.innerHTML =
+                    `
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center text-danger py-4">
+                                    Unable to load attendance records.
+                                </td>
+                            </tr>
+                            `;
+            }
+            finally {
+
+                attendanceLoading.style.display =
+                    "none";
+            }
+        }
+
+        // 输入 Student Name 时即时搜索
+        if (studentSearch) {
+
+            studentSearch.addEventListener(
+                "input",
+                function() {
+
+                    clearTimeout(searchTimer);
+
+                    searchTimer =
+                        setTimeout(
+                            filterAttendanceRecords,
+                            350
+                        );
+                }
+            );
+        }
+
+        // 切换 Status 时即时筛选
+        if (statusFilter) {
+
+            statusFilter.addEventListener(
+                "change",
+                filterAttendanceRecords
+            );
+        }
+    </script>
+}

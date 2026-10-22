@@ -1,0 +1,107 @@
+﻿@model TutionCenter.Models.AttendanceCodeViewModel
+
+@{
+    ViewData["Title"] = "Attendance Check In";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-5 col-md-7">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- // 页面标题 -->
+                    <div class="text-center mb-4">
+
+                        <h2 class="fw-bold mb-2">
+                            Attendance Check In
+                        </h2>
+
+                        <p class="text-muted mb-0">
+                            Enter the 6-digit attendance code provided by your teacher.
+                        </p>
+
+                    </div>
+
+                    <!-- // 显示 Controller 传来的错误信息 -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <!-- // 学生提交 Attendance Code 的表单 -->
+                    <form asp-action="CheckIn" method="post">
+
+                        <!-- // 防止 CSRF 攻击 -->
+                        @Html.AntiForgeryToken()
+
+                        <!-- // 显示 Model 验证错误 -->
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <!-- // 输入六位数签到码 -->
+                        <div class="mb-4">
+
+                            <label asp-for="AttendanceCode"
+                                   class="form-label fw-semibold">
+                                Attendance Code
+                            </label>
+
+                            <input asp-for="AttendanceCode"
+                                   class="form-control form-control-lg text-center fw-bold"
+                                   maxlength="6"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   placeholder="Enter 6-digit code" />
+
+                            <!-- // 显示 Attendance Code 验证错误 -->
+                            <span asp-validation-for="AttendanceCode"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <!-- // 提交签到 -->
+                        <button type="submit"
+                                class="btn btn-primary btn-lg w-100">
+                            Check In
+                        </button>
+
+                    </form>
+
+                    <!-- // 页面提示 -->
+                    <div class="alert alert-light border mt-4 mb-0">
+
+                        <small class="text-muted">
+
+                            The attendance code is only valid for 5 minutes.
+                            Make sure you are enrolled in the selected class.
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    // 启用前端 Validation
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

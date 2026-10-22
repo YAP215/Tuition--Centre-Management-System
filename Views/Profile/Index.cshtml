@@ -1,0 +1,305 @@
+﻿@model TutionCenter.Models.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<style>
+    /* 整个 Profile 页面不要太宽 */
+    .profile-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* 顶部浅蓝区域缩小 */
+    .profile-header {
+        background: linear-gradient(135deg, #edf5ff, #f8fbff);
+        padding: 24px 30px;
+    }
+
+    /* 头像整体缩小 */
+    .profile-avatar-wrapper {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        flex-shrink: 0;
+    }
+
+    /* 有图片时的头像 */
+    .profile-avatar {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+        background: #dbeafe;
+    }
+
+    /* 没有图片时的默认头像 */
+    .avatar-placeholder {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 55px;
+    }
+
+    /* 相机图标缩小 */
+    .camera-badge {
+        position: absolute;
+        right: 0;
+        bottom: 8px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.14);
+        font-size: 18px;
+    }
+
+    /* 姓名缩小 */
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    /* 说明文字缩小 */
+    .profile-description {
+        color: #4b5563;
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 360px;
+    }
+
+    /* 每一行资料不要太高 */
+    .profile-info-row {
+        display: grid;
+        grid-template-columns: 60px 220px 1fr;
+        align-items: center;
+        min-height: 72px;
+        padding: 8px 22px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* 图标缩小 */
+    .profile-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #eff6ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+    }
+
+    /* Label 和资料文字缩小 */
+    .profile-label,
+    .profile-value {
+        font-size: 15px;
+    }
+
+    /* Edit 按钮缩小 */
+    .edit-profile-btn {
+        width: 230px;
+        min-height: 50px;
+        border: 1px solid #0d6efd;
+        color: #0d6efd;
+        background: white;
+        border-radius: 9px;
+        padding: 9px 16px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .edit-button-area {
+        width: 230px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .edit-profile-btn:hover {
+        background: #0d6efd;
+        color: white;
+    }
+</style>
+
+<div class="profile-page">
+
+    <h2 class="profile-title">My Profile</h2>
+    <div class="profile-title-line"></div>
+
+    @* 显示更新成功信息 *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
+    <div class="profile-card">
+
+        @* Profile 上半部浅蓝区域 *@
+        <div class="profile-header">
+
+            <div class="profile-header-content d-flex align-items-center gap-4">
+
+                @* 用户头像 *@
+                <div class="profile-avatar-wrapper">
+
+                    @if (string.IsNullOrEmpty(Model.ProfileImage))
+                    {
+                        <div class="avatar-placeholder">
+                            👤
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="@Model.ProfileImage"
+                             alt="Profile Image"
+                             class="profile-avatar" />
+                    }
+
+                    <div class="camera-badge">
+                        📷
+                    </div>
+                </div>
+
+                @* 姓名、身份和说明 *@
+                <div class="flex-grow-1">
+
+                    <div class="profile-name">
+                        @Model.Name
+                    </div>
+
+                    <div class="mt-2">
+                        <span class="profile-role">
+                            @Model.Role
+                        </span>
+                    </div>
+
+                    <p class="profile-description mt-3 mb-0">
+                        Manage your personal information and account details.
+                    </p>
+                </div>
+
+                @* Edit Profile 按钮 *@
+                <div class="edit-button-area">
+                    <a asp-controller="Profile"
+                       asp-action="Edit"
+                       class="edit-profile-btn">
+
+                        ✏️ Edit Profile
+                    </a>
+
+                    <a asp-controller="Account"
+                       asp-action="ChangePassword"
+                       class="edit-profile-btn">
+
+                        🔑 Change Password
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        @* Profile 资料区域 *@
+        <div class="profile-body">
+
+            <div class="profile-info-row">
+                <div class="profile-icon">✉️</div>
+
+                <div class="profile-label">
+                    Email Address
+                </div>
+
+                <div class="profile-value">
+                    @Model.Email
+                </div>
+            </div>
+
+            <div class="profile-info-row">
+                <div class="profile-icon">🛡️</div>
+
+                <div class="profile-label">
+                    Role
+                </div>
+
+                <div class="profile-value">
+                    <span class="profile-role-small">
+                        @Model.Role
+                    </span>
+                </div>
+            </div>
+
+            <div class="profile-info-row">
+                <div class="profile-icon">📞</div>
+
+                <div class="profile-label">
+                    Phone Number
+                </div>
+
+                <div class="profile-value">
+                    @(string.IsNullOrEmpty(Model.PhoneNumber)
+                        ? "Not provided"
+                        : Model.PhoneNumber)
+                </div>
+            </div>
+
+            <div class="profile-info-row">
+                <div class="profile-icon">📅</div>
+
+                <div class="profile-label">
+                    Date of Birth
+                </div>
+
+                <div class="profile-value">
+                    @(Model.DateOfBirth.HasValue
+                        ? Model.DateOfBirth.Value.ToString("dd / MM / yyyy")
+                        : "Not provided")
+                </div>
+            </div>
+
+            <div class="profile-info-row">
+                <div class="profile-icon">👥</div>
+
+                <div class="profile-label">
+                    Gender
+                </div>
+
+                <div class="profile-value">
+                    @(string.IsNullOrEmpty(Model.Gender)
+                        ? "Not provided"
+                        : Model.Gender)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
